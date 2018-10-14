@@ -759,7 +759,11 @@ bool patch_lapic_version_init_64(void *kernelData)  // KernelLapicVersionPatch_6
 		{
 			patchLocation = i + 40;	
 
-			if (kernelOSVer >= MacOSVer2Int("10.13") && kernelOSVer < MacOSVer2Int("10.14"))
+			if (kernelOSVer >= MacOSVer2Int("10.14") && kernelOSVer < MacOSVer2Int("10.15"))
+			{
+				verbose("\tFound Mojave Lapic Version panic at 0x%08X\n", (unsigned int)patchLocation);
+			}
+			else if (kernelOSVer >= MacOSVer2Int("10.13") && kernelOSVer < MacOSVer2Int("10.14"))
 			{
 				verbose("\tFound High Sierra Lapic Version panic at 0x%08X\n", (unsigned int)patchLocation);
 			}
@@ -950,7 +954,7 @@ bool patch_lapic_init_64(void *kernelData)  // KernelLapicPatch_64
 			&& bytes[i+1416] == 0x00))
 		{
 			patchLocation = i+1398;
-			DBG("\tFound Sierra Lapic panic at 0x%08X\n", (unsigned int)patchLocation);
+			verbose("\tFound Sierra Lapic panic at 0x%08X\n", (unsigned int)patchLocation);
 			break;
 		}
 		// PMheart: 10.13.DP1
@@ -973,7 +977,30 @@ bool patch_lapic_init_64(void *kernelData)  // KernelLapicPatch_64
 			&& bytes[i+1414] == 0x00))
 		{
 			patchLocation = i+1396;
-			DBG("\tFound High Sierra Lapic panic at 0x%08X\n", (unsigned int)patchLocation);
+			verbose("\tFound High Sierra Lapic panic at 0x%08X\n", (unsigned int)patchLocation);
+			break;
+		}
+		// PMheart: 10.14.DP1
+		else if (KernelLapicError
+			&& (bytes[i+0] == 0x65 
+				&& bytes[i+1] == 0x8B 
+				&& bytes[i+2] == 0x0C 
+				&& bytes[i+3] == 0x25 
+				&& bytes[i+4] == 0x1C 
+				&& bytes[i+5] == 0x00 
+				&& bytes[i+6] == 0x00 
+				&& bytes[i+7] == 0x00 
+				&& bytes[i+1396] == 0x65 
+				&& bytes[i+1397] == 0x8B 
+				&& bytes[i+1398] == 0x0C 
+				&& bytes[i+1399] == 0x25 
+				&& bytes[i+1400] == 0x1C 
+				&& bytes[i+1401] == 0x00 
+				&& bytes[i+1402] == 0x00 
+				&& bytes[i+1403] == 0x00))
+		{
+			patchLocation = i+1385;
+			verbose("\tFound Mojave Lapic panic at 0x%08X\n", (unsigned int)patchLocation);
 			break;
 		}
 	}
@@ -1362,7 +1389,7 @@ void patch_BooterExtensions_64(void *kernelData)
 	Bytes = (UInt8 *)kernelData;
 	PatchApplied = false;
 
-	// High Sierra onward, need to use 10.12 instead of 10.13. kernel bug?
+	// High Sierra, Mojave onward, need to use 10.12 instead of 10.13. kernel bug?
 	// if (kernelOSVer >= MacOSVer2Int("10.13") && kernelOSVer < MacOSVer2Int("10.14"))
 	if (kernelOSVer >= MacOSVer2Int("10.12"))
 	{
@@ -1390,7 +1417,7 @@ void patch_BooterExtensions_64(void *kernelData)
 				Bytes[Index + 5] = 0x12;
 				count++;
 
-				verbose("\tFound High Sierra SIP pattern: patched!\n");
+				verbose("\tFound High Sierra, Mojave SIP pattern: patched!\n");
 
 				if (PatchApplied)
 				{
@@ -1407,7 +1434,7 @@ void patch_BooterExtensions_64(void *kernelData)
 	{
 		for (Index = 0; Index < 0x1000000; ++Index)
 		{
-			// High Sierra
+			// Sierra
 			if (Bytes[Index]         == 0xC3
 				&& Bytes[Index + 1]  == 0x48
 				&& Bytes[Index + 2]  == 0x85
@@ -1476,6 +1503,38 @@ void patch_BooterExtensions_64(void *kernelData)
 				{
 					verbose("\tFound Yosemite SIP pattern: patched!\n");
 				}
+
+				if (PatchApplied)
+				{
+					break;
+				}
+
+				PatchApplied = true;
+			}
+		}
+	}
+
+	// Mojave, need to use 10.12 instead of 10.14. kernel bug?
+	// if (kernelOSVer >= MacOSVer2Int("10.10") && kernelOSVer < MacOSVer2Int("10.14"))
+	if (kernelOSVer >= MacOSVer2Int("10.12"))
+	{
+
+		for (Index = 0; Index < 0x1000000; ++Index)
+		{
+			if (Bytes[Index]         == 0xE8
+				&& Bytes[Index + 1]  == 0xAF
+				&& Bytes[Index + 2]  == 0x00
+				&& Bytes[Index + 3]  == 0x00
+				&& Bytes[Index + 4]  == 0x00
+				&& Bytes[Index + 5]  == 0xEB
+				&& Bytes[Index + 6]  == 0x05
+				&& Bytes[Index + 7]  == 0xE8)
+			{
+				Bytes[Index + 5] = 0x90;
+				Bytes[Index + 6] = 0x90;
+				count++;
+				
+				verbose("\tFound Mojave EXT pattern: patched!\n");
 
 				if (PatchApplied)
 				{
