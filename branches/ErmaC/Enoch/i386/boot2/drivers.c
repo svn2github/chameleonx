@@ -632,7 +632,13 @@ void buildAndLoadInjectorPList(void)
 void loadEmbeddedFakeSMC(void)
 {
 	void *embedded = NULL;
+
 	embedded = malloc(FakeSMCInfo_plist_un_len); // don't free, will be done in LoadEmbeddedKext
+	if (embedded == NULL) {
+		return;
+	}
+
+
 	size_t size = lzvn_decode(embedded,
                               FakeSMCInfo_plist_un_len,
                               FakeSMCInfo_plist,
@@ -641,6 +647,7 @@ void loadEmbeddedFakeSMC(void)
 	if (FakeSMCInfo_plist_un_len != size)
 	{
 		verbose("\n\t  ERROR! FakeSMC size mismatch from lzvn (found: %zx, expected: %zx), failed!\n", size, FakeSMCInfo_plist_un_len);
+		free(embedded);
 	}
 	else
 	{
