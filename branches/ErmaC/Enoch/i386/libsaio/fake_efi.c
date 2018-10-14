@@ -472,6 +472,7 @@ static const char SYSTEM_SERIAL_PROP[] = "SystemSerialNumber";
 static const char SYSTEM_TYPE_PROP[] = "system-type";
 static const char MODEL_PROP[] = "Model";
 static const char BOARDID_PROP[] = "board-id";
+static const char DEV_COLORS[] = "device-colors";
 static const char DEV_PATH_SUP[] = "DevicePathsSupported";
 static const char START_POWER_EV[] = "StartupPowerEvents";
 static const char MACHINE_SIG_PROP[] = "machine-signature";
@@ -634,6 +635,8 @@ static void setupEfiDeviceTree(void)
 	}
 
 	DT__AddProperty(efiPlatformNode, START_POWER_EV, sizeof(STARTUP_POWER_EVENTS), (EFI_UINT8 *) &STARTUP_POWER_EVENTS);
+
+	DT__AddProperty(efiPlatformNode, DEV_COLORS, sizeof(DEV_COLORS), (EFI_UINT8 *) &DEV_COLORS);
 
 	DT__AddProperty(efiPlatformNode, DEV_PATH_SUP, sizeof(DEVICE_PATHS_SUPPORTED), (EFI_UINT8 *) &DEVICE_PATHS_SUPPORTED);
 
@@ -834,6 +837,11 @@ void setupChosenNode()
 		verbose("Adding booter spec to the Platform Expert \n");
 
 		// booter-build-time (Fri Apr 14 16:21:16 PDT 2017) 10.12.5
+		//static EFI_UINT8 const booterBuildTime[] =
+		//{
+		//   0x46, 0x72, 0x69, 0x20, 0x41, 0x70, 0x72, 0x20, 0x31, 0x34, 0x20, 0x31, 0x36, 0x3A, 0x32, 0x31, 0x3A, 0x31, 0x36, 0x20, 0x50, 0x44, 0x54, 0x20, 0x32, 0x30, 0x31, 0x37, 0x00
+		//};
+		//DT__AddProperty(chosenNode, "booter-build-time", sizeof(booterBuildTime), (EFI_UINT8*) &booterBuildTime);
 		DT__AddProperty(chosenNode, "booter-build-time", sizeof(I386BOOT_BUILDDATE), I386BOOT_BUILDDATE);
 
 		// booter-name
@@ -844,6 +852,11 @@ void setupChosenNode()
 		DT__AddProperty(chosenNode, "booter-name", sizeof(booterName), (EFI_UINT8*) &booterName);
 
 		// booter-version (version:324.50.13) 10.12.5
+		//static EFI_UINT8 const booterVersion[] =
+		//{
+		//    0x76, 0x65, 0x72, 0x73, 0x69, 0x6F, 0x6E, 0x3A, 0x33, 0x32, 0x34, 0x2E, 0x35, 0x30, 0x2E, 0x31, 0x33, 0x00
+		//};
+		//DT__AddProperty(chosenNode, "booter-version", sizeof(booterVersion), (EFI_UINT8*) &booterVersion);
 		DT__AddProperty(chosenNode, "booter-version", sizeof(I386BOOT_CHAMELEONREVISION), I386BOOT_CHAMELEONREVISION);
 	}
 }
